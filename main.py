@@ -9,7 +9,7 @@ sys.path.insert(0, "src")
 from data_preprocessing import load_raw_data, clean_data, save_processed_data
 from eda import run_eda
 from feature_engineering import split_features_target
-from train_models import train_all_models
+from train_models import train_all_models, build_pipeline, build_xgboost
 from evaluate import evaluate_all
 
 
@@ -30,8 +30,13 @@ def main():
     X_train, X_test, y_train, y_test = split_features_target(clean_df)
     print(f"   Train: {X_train.shape[0]} rows | Test: {X_test.shape[0]} rows")
 
-    print("5. Training models (Logistic Regression, Random Forest)...")
+    print("5. Training models (Logistic Regression, Random Forest, XGBoost)...")
     fitted_models = train_all_models(X_train, y_train)
+    # train_all_models covers LR and RF (from MODEL_CONFIGS); add the tuned XGBoost,
+    # which needs y_train for its imbalance setting, so it's built via a factory.
+    xgb_pipeline = build_pipeline(build_xgboost(y_train))
+    xgb_pipeline.fit(X_train, y_train)
+    fitted_models["xgboost"] = xgb_pipeline
 
     print("6. Evaluating on test set...")
     results = evaluate_all(fitted_models, X_test, y_test)

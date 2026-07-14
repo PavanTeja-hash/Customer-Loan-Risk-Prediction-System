@@ -8,4 +8,6 @@ data/processed/*
 !data/processed/.gitkeep
 models/*
 !models/.gitkeep
+# small (~1.8MB) tuned XGBoost; committed so the deployed app can load it
+!models/best_model.joblib
 .env
